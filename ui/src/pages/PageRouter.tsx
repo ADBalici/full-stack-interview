@@ -1,4 +1,4 @@
-import {LuFileSearch} from "react-icons/lu";
+import {LuScale} from "react-icons/lu";
 import {
     Route,
     Routes,
@@ -8,13 +8,13 @@ import {
 
 import type {SidebarLinkType} from "@/components/Sidebar";
 import {SidebarLayout} from "@/layouts/SidebarLayout";
-import {Files} from "@/pages/Files";
+import {Lawsuits} from "@/pages/Lawsuits";
 
 const SIDEBAR_LINKS: SidebarLinkType[] = [
     {
         to: "/",
-        label: "Files",
-        icon: <LuFileSearch/>,
+        label: "Lawsuits",
+        icon: <LuScale/>,
     },
 ];
 
@@ -29,7 +29,7 @@ export function PageRouter() {
                         </SidebarLayout>
                     }
                 >
-                    <Route path="/" element={<Files/>}/>
+                    <Route path="/" element={<Lawsuits/>}/>
                 </Route>
             </Routes>
         </BrowserRouter>

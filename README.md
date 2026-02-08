@@ -1,110 +1,90 @@
-# Interview Task: Portal Just Integration
+# Court Case Tracker
 
-We need to integrate with the Romanian court system's public API to fetch lawsuit hearing data. 
-The system is called Portal Just and is available at https://portal.just.ro. 
-Your task is to create a NestJS provider that can query lawsuit  information by case number.
+A full-stack application for tracking Romanian court cases via Portal Just.
 
-### Task 1: Lawsuit Lookup
+## Getting Started
 
-Create a provider that fetches lawsuit data from Portal Just and an endpoint to query
-it.
+### Prerequisites
 
-```
-GET /lawsuits?caseNumber=:caseNumber or /lawsuits/:caseNumber
+- Node.js 20+
+- npm
 
-Response example:                                                                    
-{                                                                                    
-    "caseNumber": "306/3/2025",                                                        
-    "filingDate": "2025-01-15",                                                        
-    "institution": "Tribunalul București",                                             
-    "hearings": [                                                                      
-        {                                                                                
-            "date": "2025-02-20",                                                          
-            "time": "09:00",                                                               
-            "resolution": null                                                             
-        },                                                                               
-        {                                                                                
-            "date": "2025-03-15",                                                          
-            "time": "10:30",                                                               
-            "resolution": "Amânare pentru lipsă procedură"                                 
-        }                                                                                
-    ]                                                                                  
-}
+### Backend
+
+```bash
+cd be
+npm install
+npm run start:dev
 ```
 
-Test case numbers: 21969/301/2025, 22760/325/2025, 12636/180/2025
+Runs on http://localhost:3000
 
-### Task 2: Subscribe to a Lawsuit
+### Frontend
 
-Create an endpoint to subscribe to a lawsuit. When subscribing, fetch the current    
-data and store it.
-
-Requirements:
-- Validate case number format (number/number/year)
-- Fetch lawsuit data from Portal Just
-- Store the subscription with its current data
-- Return 404 if case doesn't exist in Portal Just
-- Return 409 if already subscribed to this case
-
-```
-POST /subscriptions                                                                  
-Body: { "caseNumber": "306/3/2025" }
-
-Response:                                                                            
-{                                                                                    
-    "id": "uuid",                                                                      
-    "caseNumber": "306/3/2025",                                                        
-    "subscribedAt": "2025-01-14T10:30:00Z",                                            
-    "lawsuit": { ... }                                                                 
-}
+```bash
+cd ui
+npm install
+npm run dev
 ```
 
-### Task 3: Calendar View
+Runs on http://localhost:5173
 
-Aggregate all hearings from all subscribed lawsuits into a calendar view.
+## What's Already Built
 
-Requirements:
-- Return hearings from ALL subscribed lawsuits
-- Filter by date range
-- Sort by date ascending
-- Include case reference so user knows which lawsuit the hearing belongs to
+- **Backend**: NestJS API with a `GET /lawsuits?caseNumber=X` endpoint that queries the Portal Just SOAP API, parses the XML response, and returns structured JSON with case info, parties, and hearings.
+- **Frontend**: React app with a search page where you enter a case number and see case details, parties, and a hearings table.
 
-```
-GET /calendar?from=2025-01-01&to=2025-12-31
+Test case numbers: `21969/301/2025`, `22760/325/2025`, `12636/180/2025`
 
-Response:                                                                            
-{                                                                                    
-    "hearings": [                                                                      
-        {                                                                                
-            "date": "2025-02-20",                                                          
-            "time": "09:00",                                                               
-            "caseNumber": "306/3/2025",                                                    
-            "institution": "Tribunalul București",                                         
-            "resolution": null                                                             
-        },                                                                               
-        {                                                                                
-            "date": "2025-02-22",                                                          
-            "time": "14:00",                                                               
-            "caseNumber": "1/3/2025",                                                      
-            "institution": "Judecătoria Sector 3 București",                               
-            "resolution": null                                                             
-        }                                                                                
-    ]                                                                                  
-}
-```
+---
 
-### Task 4: Sync Subscriptions
+## Task 1: Bug Fixes (~30 min)
 
-Create an endpoint to refresh lawsuit data from Portal Just for all subscriptions (or
-a specific one).
+Open the app and try searching for the case numbers above. You'll notice some issues — some searches may fail entirely, some show unexpected data, and there may be cosmetic problems.
 
-Requirements:
-- Fetch fresh data from Portal Just
-- Update stored lawsuit data
-- Update lastSyncedAt timestamp
-- For bulk sync: handle concurrency (don't fire 100 requests at once)
+Find and fix the bugs. For each one:
 
-```
-POST /subscriptions/sync                                                             
-POST /subscriptions/:id/sync
-```
+1. Identify the root cause
+2. Implement a fix
+3. Be ready to explain your approach
+
+---
+
+## Task 2: Subscriptions (~30 min)
+
+Right now, a user has to remember and re-type a case number every time they want to check on it. We want to add the ability to **subscribe** to court cases — save them so you can come back later and see if anything changed (new hearing scheduled, resolution issued, etc.).
+
+**What to build:**
+
+- A way to subscribe to a case (e.g., from the search results)
+- A way to see all your subscribed cases
+- A way to view the latest data for a subscribed case
+
+**Scope:** Just saving and retrieving — no polling, syncing, or notifications. Keep it simple.
+
+**Design decisions are up to you:**
+
+- There is no database configured — how will you store subscriptions?
+- What does the API look like? What data do you store when subscribing?
+- How does the UI flow work?
+
+Be ready to explain your choices. There's no single right answer — we're interested in your reasoning.
+
+---
+
+## Task 3: Architecture Discussion (~30 min)
+
+No code for this one — just a conversation with your interviewer.
+
+In Tasks 1 and 2 you built the building blocks: looking up a case by number and saving subscriptions. Now imagine we're taking this to production:
+
+> We have 10,000 users subscribed to cases across 250 courts. When something changes on a case — a new hearing is scheduled, a resolution is issued — we need to notify the subscribed users. Portal Just has no webhooks or push notifications. The only way to know if something changed is to query their API.
+
+**Topics we'll discuss:**
+
+- How do you detect that something changed on a case?
+- How often do you check, and how do you handle 10,000 cases without overwhelming the API?
+- How do you notify users — and what happens when notifications fail?
+- What infrastructure would you use?
+
+Be prepared to discuss trade-offs. There are many valid approaches — we want to understand how you think about system design.

@@ -6,7 +6,7 @@ import ReactDOM from "react-dom/client";
 
 import {PageRouter} from "@/pages/PageRouter";
 
-const REACT_QUERY_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+const REACT_QUERY_STALE_TIME = Infinity;
 
 const system = createSystem(defaultConfig, {
     globalCss: {
